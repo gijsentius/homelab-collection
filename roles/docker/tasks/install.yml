@@ -25,7 +25,6 @@
         allow_downgrade: true
   when: docker_version is defined
 
-
 - name: Install latest docker version from repository
   ansible.builtin.apt:
     pkg:

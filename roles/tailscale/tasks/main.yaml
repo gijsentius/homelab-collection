@@ -1,0 +1,9 @@
+- name: Download install script
+  ansible.builtin.get_url:
+    url: https://tailscale.com/install.sh
+    dest: /tmp/install_tailscale.sh
+    mode: '0444'
+
+- name: Execute tailscale install script
+  ansible.builtin.command: >
+    sh /tmp/install_tailscale.sh
