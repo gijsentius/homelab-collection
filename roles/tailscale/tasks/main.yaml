@@ -7,3 +7,7 @@
 - name: Execute tailscale install script
   ansible.builtin.command: >
     sh /tmp/install_tailscale.sh
+
+- name: Register machine with tailscale
+  ansible.builtin.command: >
+    "tailscale up --auth-key='{{ tailscale_auth_key }}' --advertise-tags='tag:server'"
