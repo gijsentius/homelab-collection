@@ -10,4 +10,4 @@
 
 - name: Register machine with tailscale
   ansible.builtin.command: >
-    "tailscale up --auth-key='{{ tailscale_auth_key }}' --advertise-tags='tag:server'"
+    tailscale up --auth-key='{{ tailscale_auth_key }}' --advertise-tags='tag:server'
