@@ -22,6 +22,7 @@
     state: link
   when: 
     - '"systemd-resolved.service" in services'
+    - '"lnk_target" in resolv_conf.stat'
     - '"stub-resolv.conf" in resolv_conf.stat.lnk_target'
 
 - name: Restart systemd-resolved service 

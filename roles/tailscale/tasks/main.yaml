@@ -1,13 +1,29 @@
-- name: Download install script
-  ansible.builtin.get_url:
-    url: https://tailscale.com/install.sh
-    dest: /tmp/install_tailscale.sh
-    mode: '0444'
+- name: Install and setup tailscale connection
+  block:
+    - name: Check if tailscale install script is present
+      ansible.builtin.stat:
+        path: /tmp/install_tailscale.sh  
+      register: stat_result
 
-- name: Execute tailscale install script
-  ansible.builtin.command: >
-    sh /tmp/install_tailscale.sh
+    - name: Download install script
+      ansible.builtin.get_url:
+        url: https://tailscale.com/install.sh
+        dest: /tmp/install_tailscale.sh
+        mode: '0444'
+      when: not stat_result.stat.exists
 
-- name: Register machine with tailscale
-  ansible.builtin.command: >
-    tailscale up --auth-key='{{ tailscale_auth_key }}' --advertise-tags='tag:server'
+
+    - name: Check if tailscale is already installed
+      ansible.builtin.stat:
+        path: /usr/bin/tailscale
+      register: tailscale_present
+
+    - name: Execute tailscale install script
+      ansible.builtin.command: >
+        sh /tmp/install_tailscale.sh
+      when: not tailscale_present.stat.exists
+
+    - name: Register machine with tailscale
+      ansible.builtin.command: >
+        tailscale up --auth-key='{{ tailscale_auth_key }}' --advertise-tags='tag:server'
+  become: true

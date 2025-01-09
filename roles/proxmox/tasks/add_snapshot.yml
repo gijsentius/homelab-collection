@@ -1,6 +1,6 @@
 - name: Create a snapshot and keep only the 2 newest snapshots
   community.general.proxmox_snap:
-    api_host: "{{ proxmox_pve_node }}"
+    api_host: "{{ proxmox.api.host }}"
     api_user: "{{ proxmox.api.user.full_name }}"
     api_token_id: "{{ proxmox.api.token.id }}"
     api_token_secret: "{{ proxmox.api.token.secret }}"
@@ -8,3 +8,5 @@
     snapname: "snapshot-{{ ansible_date_time.iso8601_basic_short }}"
     retention: 2
     state: present
+  delegate_to: localhost
+
