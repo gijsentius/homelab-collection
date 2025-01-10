@@ -1,0 +1,37 @@
+- name: Install & setup nginx
+  block:
+    - name: Update apt packages
+      ansible.builtin.apt:
+        cache_valid_time: 3600
+        update_cache: true
+
+    - name: Install nginx package
+      ansible.builtin.apt:
+        pkg: nginx
+        state: present
+
+    - name: Write nginx config
+      ansible.builtin.template:
+        src: gijsentius.local.j2
+        dest: /etc/nginx/sites-available/gijsentius.local
+        mode: '0644'
+      register: nginx_config_template_output
+
+    - name: Link nginx config to enable
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/gijsentius.local
+        dest: /etc/nginx/sites-enabled/gijsentius.local
+        force: true
+        state: link
+
+    - name: Restart nginx 
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+      when: nginx_config_template_output.changed 
+    
+    - name: Start nginx service
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: started
+  become: true

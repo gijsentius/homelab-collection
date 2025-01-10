@@ -1,0 +1,12 @@
+server {
+    listen 80;
+{% for application in nginx_applications %}
+    location /{{ application.name }}/ {
+        rewrite ^/{{ application.name }}/?(.*)$ /$1 break;
+        proxy_pass  http://{{ application.host }}:{{ application.port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+{% endfor %}
+}
