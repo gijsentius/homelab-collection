@@ -1,8 +1,9 @@
 - name: Try to create a VM in proxmox
   block:
-    - name: Choose pve node
+    - name: Set essentials facts for rolling out |VM
       ansible.builtin.set_fact:
         proxmox_pve_node: "{{ host_node | default(proxmox.nodes | random) }}" 
+        force_update: "{{ host_force_update | default(false) }}"
     
     # TODO autodiscover the pve node when the vm already exists
 
@@ -54,7 +55,7 @@
       ansible.builtin.import_tasks: add_storage.yml
       when: host_disks is defined
 
-    - name: Configure cloud init parameters
+    - name: Configure cloud init parameters with static ip
       community.general.proxmox_kvm:
         name: "{{ host_name }}"
         timeout: "{{ proxmox.api.timeout | default(300) }}"
@@ -72,7 +73,28 @@
         ipconfig:
           ipconfig0: "ip={{ host_ipv4 }}/{{ host_subnet }},gw={{ host_gateway }}" 
         update: true
-      when: created_vm.changed
+      when:
+        - host_ipv4
+        - created_vm.changed or force_update
+      register: proxmox_configure_cloud_init
+
+    - name: Configure cloud init parameters with dhcp
+      community.general.proxmox_kvm:
+        name: "{{ host_name }}"
+        timeout: "{{ proxmox.api.timeout | default(300) }}"
+        node: "{{ proxmox_pve_node }}"
+        api_user: "{{ proxmox.api.user.full_name }}"
+        api_token_id: "{{ proxmox.api.token.id }}"
+        api_token_secret: "{{ proxmox.api.token.secret }}"
+        api_host: "{{ proxmox.api.host }}"
+        autostart: "{{ host_autostart | default(true)  }}"
+        ciuser: "{{ host_user }}"
+        cipassword: "{{ host_password }}"
+        sshkeys: "{{ host_ssh_keys | default(omit) }}"
+        update: true
+      when:
+        - not host_ipv4
+        - created_vm.changed or force_update
       register: proxmox_configure_cloud_init
     
     - name: Start VM in proxmox
