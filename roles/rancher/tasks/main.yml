@@ -20,3 +20,11 @@
   ansible.builtin.import_tasks: install_rke2_agent.yml
   become: true
   when: '"agent" in inventory_hostname' 
+
+#- name: Add bin path to PATH
+  #  become: true
+  #ansible.builtin.copy:
+  #  dest: /etc/profile.d/rancher-profile.sh
+  #  content: 'PATH=$PATH:/var/lib/rancher/rke2/bin'
+  #  mode: "0644"
+
