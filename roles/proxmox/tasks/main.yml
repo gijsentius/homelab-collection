@@ -1,6 +1,6 @@
 - name: Try to create a VM in proxmox
   block:
-    - name: Set essentials facts for rolling out |VM
+    - name: Set essentials facts for rolling out VM
       ansible.builtin.set_fact:
         proxmox_pve_node: "{{ host_node | default(proxmox.nodes | random) }}" 
         force_update: "{{ host_force_update | default(false) }}"
@@ -149,7 +149,7 @@
         api_token_secret: "{{ proxmox.api.token.secret }}"
         api_host: "{{ proxmox.api.host }}"
         state: restarted 
-      when: not host_remove_failed
+      when: not host_remove_failed or force_update
     
     - name: Remove VM in proxmox
       community.general.proxmox_kvm:
