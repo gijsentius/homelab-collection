@@ -1,11 +1,12 @@
 [misc]
-host_whitelist = {{ host_name }}.{{ host_zone }}
+host_whitelist = {{ host_name }}.{{ host_zone }},{{ sabnzb_whitelist | default(omit) }}
 api_key = {{ sabnzb_api_key }}
 download_dir = {{ sabnzb_download_dir }} 
 download_free = ""
 complete_dir = {{ sabnzb_complete_dir }}
 complete_free = ""
 permissions = 0777
+inet_exposure = {{ sabnzb_inet_exposure | default(4) }}
 [logging]
 log_level = 1
 max_log_size = 5242880
