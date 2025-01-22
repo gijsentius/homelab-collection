@@ -1,12 +1,14 @@
-- name: Update apt packages
-  ansible.builtin.apt:
-    cache_valid_time: 3600
-    update_cache: true
+- name: 
+  when: 
+  - name: Update apt packages
+    ansible.builtin.apt:
+      cache_valid_time: 3600
+      update_cache: true
 
-# Ubuntu/debian
-# TODO: Create for RHEL and perform if statement
-- name: Install unattended upgrades package
-  ansible.builtin.apt:
-    pkg:
-      - unattended-upgrades
-      - apt-listchanges
+  # Ubuntu/debian
+  # TODO: Create for RHEL and perform if statement
+  - name: Install unattended upgrades package
+    ansible.builtin.apt:
+      pkg:
+        - unattended-upgrades
+        - apt-listchanges

@@ -1,0 +1,50 @@
+# Download and apply manifests
+
+- name: Install requirements for using kubernetes.core
+  ansible.builtin.pip:
+    name:
+      - kubernetes >= 24.2.0
+      - PyYAML >= 3.11
+      - jsonpatch
+    break_system_packages: true
+
+- name: Create folder for system-upgrade-controller
+  ansible.builtin.file:
+    path: ~/system-upgrade-controller
+    state: directory
+
+- name: Download system upgrade controller manifest to the cluster.
+  ansible.builtin.get_url:
+    url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/system-upgrade-controller.yaml
+    dest: ~/system-upgrade-controller/manifest.yaml
+    mode: '0664'
+
+- name: Download system-upgrade-controller crd to the cluster.
+  ansible.builtin.get_url:
+    url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/crd.yaml
+    dest: ~/system-upgrade-controller/crd.yaml
+    mode: '0664'
+
+- name: Apply system-upgrade-controller manifest to the cluster.
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
+    src: ~/system-upgrade-controller/manifest.yaml
+    state: present
+
+- name: Apply system-upgrade-controller crd to the cluster.
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
+    src: ~/system-upgrade-controller/crd.yaml
+    state: present
+
+- name: Create upgrade plan manifests
+  ansible.builtin.template:
+    src: upgrade-plans.yaml.j2
+    dest: ~/system-upgrade-controller/plans.yaml
+
+- name: Apply upgrade plan for server and agents
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/rke2/rke2.yaml
+    src: ~/system-upgrade-controller/plans.yaml
+    state: present
+
