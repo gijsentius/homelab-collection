@@ -1,6 +1,11 @@
 - name: Configure ssh key for {{ inventory_hostname }}
   ansible.builtin.import_tasks: configure_access.yml 
 
+- name: Configure auto updates for {{ inventory_hostname }}
+  ansible.builtin.import_tasks: install_auto_updates.yml
+  become: true
+  when: host_auto_updates
+
 - name: Configure DNS for {{ inventory_hostname }}
   ansible.builtin.import_tasks: configure_dns.yml
   become: true

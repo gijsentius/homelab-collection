@@ -1,0 +1,22 @@
+- name: Install auto updates for debian based systems
+  block:
+    - name: Update apt packages
+      ansible.builtin.apt:
+        cache_valid_time: 3600
+        update_cache: true
+
+    - name: Install unattended upgrades package
+      ansible.builtin.apt:
+        pkg:
+          - unattended-upgrades
+          - apt-listchanges
+    
+    - name: Enable periodic updating packages
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+  when: 
+    - ansible_facts['os_family']|lower == 'debian'
+
