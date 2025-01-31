@@ -1,0 +1,46 @@
+- name: Check if flux is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/flux
+  register: flux_installed
+
+- name: Download the flux installation script
+  ansible.builtin.get_url:
+    url: https://fluxcd.io/install.sh
+    dest: /tmp/install-flux.sh
+    mode: '0755'
+  when: not flux_installed.stat.exists
+
+- name: Execute the flux installation script
+  ansible.builtin.command: /tmp/install-flux.sh
+  when: not flux_installed.stat.exists
+
+- name: Clean up the installation script
+  ansible.builtin.file:
+    path: /tmp/install-flux.sh
+    state: absent
+  when: not flux_installed.stat.exists
+
+- name: test
+  command: >
+    echo $GITLAB_TOKEN
+  environment:
+    GITHUB_TOKEN: "{{ flux_github_token }}"
+  register: test_output
+
+- name: test output
+  debug:
+    msg: "{{ test_output }}"
+
+- name: Bootstrap flux
+  ansible.builtin.command: >
+    flux bootstrap github
+    --personal
+    --token-auth
+    --owner={{ flux_github_user }}
+    --repository={{ flux_github_repository }}
+    --branch=main
+    --path=clusters/{{ flux_cluster_name }}
+  environment:
+    KUBECONFIG: "/etc/rancher/rke2/rke2.yaml"
+    GITHUB_TOKEN: "{{ flux_github_token }}"
+  when: flux_bootstrap_type == 'github'
