@@ -1,4 +1,5 @@
 - name: Try to create a VM in proxmox
+  when: host_type == 'vm'
   block:
     - name: Set essentials facts for rolling out VM
       ansible.builtin.set_fact:
