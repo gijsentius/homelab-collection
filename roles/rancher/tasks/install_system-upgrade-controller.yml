@@ -1,4 +1,9 @@
 # Download and apply manifests
+- name: Install pip
+  become: true
+  ansible.builtin.apt:
+    name:
+      - pip
 
 - name: Install requirements for using kubernetes.core
   ansible.builtin.pip:
