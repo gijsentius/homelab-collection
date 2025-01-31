@@ -2,3 +2,4 @@ write-kubeconfig-mode: "0644"
 tls-san:
   - {{ host_name }}.{{ host_zone }} 
 debug: false 
+cni: {{ rancher_cni | default('canal') }}
