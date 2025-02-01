@@ -1,6 +1,7 @@
+{% if nginx.local is defined %}
 server {
     listen 80;
-{% for application in nginx_applications %}
+{% for application in nginx.local %}
     location /{{ application.name }}/ {
         rewrite ^/{{ application.name }}/?(.*)$ /$1 break;
         proxy_pass  http://{{ application.host }}:{{ application.port }};
@@ -10,3 +11,4 @@ server {
     }
 {% endfor %}
 }
+{% endif %}

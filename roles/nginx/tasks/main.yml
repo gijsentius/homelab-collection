@@ -7,7 +7,7 @@
 
     - name: Install nginx package
       ansible.builtin.apt:
-        pkg: nginx
+        pkg: nginx-full
         state: present
 
     - name: Disable default config
@@ -15,19 +15,17 @@
         path: /etc/nginx/sites-enabled/default
         state: absent
 
-    - name: Write nginx config
-      ansible.builtin.template:
-        src: gijsentius.local.j2
-        dest: /etc/nginx/sites-available/gijsentius.local
-        mode: '0644'
-      register: nginx_config_template_output
+    - name: "Configure l4 routes"
+      ansible.builtin.include_tasks:
+        file: l4_loadbalancer.yml
 
-    - name: Link nginx config to enable
-      ansible.builtin.file:
-        src: /etc/nginx/sites-available/gijsentius.local
-        dest: /etc/nginx/sites-enabled/gijsentius.local
-        force: true
-        state: link
+    - name: "Configure l7 routes"
+      ansible.builtin.include_tasks:
+        file: l7_loadbalancer.yml
+
+    - name: "Configure local routes"
+      ansible.builtin.include_tasks:
+        file: local_loadbalancer.yml
 
     - name: Restart nginx 
       ansible.builtin.systemd_service:
