@@ -10,7 +10,7 @@
     - name: Link nginx config to enable
       ansible.builtin.file:
         src: /etc/nginx/sites-available/l4.conf
-        dest: /etc/nginx/sites-enabled/l4.conf
+        dest: /etc/nginx/sites-enabled/l4/l4.conf
         force: true
         state: link
   when: nginx.l4 is defined

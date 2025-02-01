@@ -7,13 +7,30 @@
 
     - name: Install nginx package
       ansible.builtin.apt:
-        pkg: nginx-full
+        name: 
+          - nginx
+          - nginx-full
         state: present
 
     - name: Disable default config
       ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
+
+    - name: Configure basic nginx settings
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+    - name: Create l4 folder if not present
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/l4
+        state: directory
+
+    - name: Create l7 folder if not present
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/l7
+        state: directory
 
     - name: "Configure l4 routes"
       ansible.builtin.include_tasks:

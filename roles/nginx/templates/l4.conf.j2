@@ -5,9 +5,9 @@ stream {
     upstream {{ application.hostname }}-stream {
     {% for server in application.servers %}
         {% if server.port is defined %}
-        server {{ app_server.hostname }}:{{ app_server.port }} {{ app_server.options | default(omit) }};
+        server {{ app_server.hostname }}:{{ app_server.port }} {{ app_server.options | default(None) }};
         {% else %}
-        server {{ server.hostname }}:{{ application.port }} {{ server.options | default(omit) }};
+        server {{ server.hostname }}:{{ application.port }} {{ server.options | default(None) }};
         {% endif %}
     {% endfor %}
     }
