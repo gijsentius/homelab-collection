@@ -44,7 +44,7 @@
     restart_policy: "unless-stopped"
     state: started
 
-- name: Configure sabnzb
+- name: Configure qbittorrent
   ansible.builtin.template:
     src: qBittorrent.conf.j2
     dest: "/home/{{ host_user }}/config/qbittorrent/config/qBittorrent.conf"
