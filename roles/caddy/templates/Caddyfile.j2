@@ -1,5 +1,12 @@
 {% for caddy_server in caddy_servers %}
 {{ caddy_server.server }} {
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10MB
+            roll_keep 5
+            roll_keep_days 14
+        }
+    }
 {% if caddy_server.protocol == 'https' %}
     reverse_proxy {% for caddy_host in caddy_server.hosts -%}https://{{ caddy_host }}:{{ caddy_server.port }} {% endfor %} {
         transport http {
