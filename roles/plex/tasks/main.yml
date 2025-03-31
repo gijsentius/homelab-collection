@@ -26,7 +26,7 @@
 - name: Start Plex Docker container
   community.docker.docker_container:
     name: plex 
-    image: ghcr.io/hotio/plex
+    image: ghcr.io/hotio/plex:latest
     env:
       TZ: Europe/Amsterdam
       PUID: '1000'
@@ -79,7 +79,7 @@
 - name: start overseerr docker container
   community.docker.docker_container:
     name: overseerr 
-    image: sctx/overseerr
+    image: sctx/overseerr:latest
     env:
       TZ: Europe/Amstedam
     volumes:
