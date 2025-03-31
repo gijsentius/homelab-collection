@@ -22,20 +22,6 @@
         src: nginx.conf.j2
         dest: /etc/nginx/nginx.conf
 
-    - name: Create l4 folder if not present
-      ansible.builtin.file:
-        path: /etc/nginx/sites-enabled/l4
-        state: directory
-
-    - name: Create l7 folder if not present
-      ansible.builtin.file:
-        path: /etc/nginx/sites-enabled/l7
-        state: directory
-
-    - name: "Configure l4 routes"
-      ansible.builtin.include_tasks:
-        file: l4_loadbalancer.yml
-
     - name: "Configure l7 routes"
       ansible.builtin.include_tasks:
         file: l7_loadbalancer.yml
@@ -48,10 +34,5 @@
       ansible.builtin.systemd_service:
         name: nginx
         state: restarted
-      when: nginx_config_template_output.changed 
     
-    - name: Start nginx service
-      ansible.builtin.systemd_service:
-        name: nginx
-        state: started
   become: true

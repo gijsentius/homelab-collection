@@ -9,7 +9,7 @@
     - name: Link nginx config to enable
       ansible.builtin.file:
         src: /etc/nginx/sites-available/l7.conf
-        dest: /etc/nginx/sites-enabled/l7/l7.conf
+        dest: /etc/nginx/sites-enabled/l7.conf
         force: true
         state: link
   when: nginx.l7 is defined
