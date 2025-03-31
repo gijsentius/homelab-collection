@@ -54,8 +54,8 @@
     volumes:
       - ~/config/sonarr:/config
       - ~/plex/data:/data
-    # ports:
-    #   - 8989:8989 
+    ports:
+      - 8989:8989
     restart_policy: "always"
     state: started
 
@@ -71,8 +71,8 @@
     volumes:
       - ~/config/radarr:/config
       - ~/plex/data:/data
-    # ports:
-    #   - 7878:7878
+    ports:
+      - 7878:7878
     restart_policy: "always"
     state: started
 
