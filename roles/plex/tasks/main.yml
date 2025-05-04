@@ -1,3 +1,32 @@
+- name: Try to install NVIDIA packages
+  become: true
+  block:
+    - name: Add nvidia APT repository
+      ansible.builtin.deb822_repository:
+        name: nvidia-container-list
+        types: [deb]
+        uris: "https://nvidia.github.io/libnvidia-container/stable/deb/"
+        signed_by: "https://nvidia.github.io/libnvidia-container/gpgkey"
+        suites: [/]
+        state: present
+        enabled: yes
+
+    - name: Install necessary packages on host
+      ansible.builtin.apt:
+        state: present
+        name: 
+          - nvidia-container-toolkit
+          - nvidia-driver-570
+
+    - name: Setup docker to use nvidia toolkit 
+      ansible.builtin.command: >
+        nvidia-ctk runtime configure --runtime=docker
+
+    - name: Restart Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
 - name: Create necessary media directory tv
   ansible.builtin.file:
     path: "/home/{{ host_user }}/plex/data/media/tv"
@@ -36,6 +65,11 @@
       - "/home/{{ host_user }}/config/plex:/config"
       - "/home/{{ host_user }}/plex/data/media/tv:/tv"
       - "/home/{{ host_user }}/plex/data/media/movies:/movies" 
+    device_requests:
+      - driver: nvidia
+        count: -1 # this means we want all
+        capabilities:
+          - gpu
     restart_policy: "unless-stopped"
     state: started
     ports:
