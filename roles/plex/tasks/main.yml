@@ -70,6 +70,7 @@
         count: -1 # this means we want all
         capabilities:
           - gpu
+          - video
     restart_policy: "unless-stopped"
     state: started
     ports:
