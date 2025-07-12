@@ -4,7 +4,7 @@
 - name: Update DNS config for systemd-resolved
   ansible.builtin.template:
     src: resolved.conf.j2
-    dest: /etc/systemd/resolved.conf
+    dest: /etc/systemd/resolved.conf.d/custom.conf
   when: '"systemd-resolved.service" in services'
 
 - name: Check if /etc/resolv.conf is correctly linked
@@ -16,14 +16,14 @@
 
 - name: Link resolv.conf to resolved.conf
   ansible.builtin.file:
-    src: /run/systemd/resolve/resolv.conf
+    src: /run/systemd/resolve/stub-resolv.conf
     dest: /etc/resolv.conf
     force: true
     state: link
   when: 
     - '"systemd-resolved.service" in services'
     - '"lnk_target" in resolv_conf.stat'
-    - '"stub-resolv.conf" in resolv_conf.stat.lnk_target'
+    - '"stub-resolv.conf" not in resolv_conf.stat.lnk_target'
 
 - name: Restart systemd-resolved service 
   ansible.builtin.systemd_service:

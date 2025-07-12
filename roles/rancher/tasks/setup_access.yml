@@ -1,0 +1,45 @@
+- name: Copy RKE2 config to Ansible control machine
+  block:
+    - name: Set target host in a variable to access
+      ansible.builtin.set_fact:
+        rancher_target: "{{ ansible_host }}"
+
+    - name: Get local user home directory
+      ansible.builtin.shell: echo $HOME
+      register: local_home
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Create local .kube directory on control machine
+      ansible.builtin.file:
+        path: "{{ local_home.stdout }}/.kube"
+        state: directory
+        mode: '0755'
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Fetch RKE2 config to control machine
+      ansible.builtin.fetch:
+        src: /etc/rancher/rke2/rke2.yaml
+        dest: "{{ local_home.stdout }}/.kube/config-{{ inventory_hostname }}"
+        flat: yes
+      become: true
+
+    - name: Update server URL in fetched config
+      ansible.builtin.replace:
+        path: "{{ local_home.stdout }}/.kube/config-{{ inventory_hostname }}"
+        regexp: 'server: https://(127\.0\.0\.1|localhost):6443'
+        replace: 'server: https://{{ rancher_target }}:6443'
+      delegate_to: localhost
+      become: false
+
+    - name: Copy fetched config to default kube config (optional)
+      ansible.builtin.copy:
+        src: "{{ local_home.stdout }}/.kube/config-{{ inventory_hostname }}"
+        dest: "{{ local_home.stdout }}/.kube/config"
+        mode: '0600'
+      delegate_to: localhost
+      become: false
+      when: rancher_set_default_context | default(false)
