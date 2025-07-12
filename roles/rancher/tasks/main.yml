@@ -1,7 +1,7 @@
 - name: Install rancher server 
   ansible.builtin.import_tasks: install_rke2_server.yml
   become: true
-  when: '"server" in inventory_hostname' 
+  when: '"rancher_server" in group_names' 
 
 - name: Retrieve server token from {{ rancher_server }}
   ansible.builtin.slurp: 
@@ -9,22 +9,41 @@
   become: true
   delegate_to: "{{ rancher_server }}"
   register: rke_server_token_slurp
-  when: '"agent" in inventory_hostname' 
+  when: '"rancher_agent" in group_names' 
 
 - name: Register server token from {{ rancher_server }}
   ansible.builtin.set_fact: 
     rke_server_token: "{{ rke_server_token_slurp['content'] | b64decode }}"
-  when: '"agent" in inventory_hostname' 
+  when: '"rancher_agent" in group_names' 
 
 - name: Install rancher agent 
   ansible.builtin.import_tasks: install_rke2_agent.yml
   become: true
-  when: '"agent" in inventory_hostname' 
+  when: '"rancher_agent" in group_names' 
 
-#- name: Add bin path to PATH
-  #  become: true
-  #ansible.builtin.copy:
-  #  dest: /etc/profile.d/rancher-profile.sh
-  #  content: 'PATH=$PATH:/var/lib/rancher/rke2/bin'
-  #  mode: "0644"
+- name: Get local rancher user
+  ansible.builtin.set_fact:
+    rancher_user: "{{ lookup('env', 'USER') }}"
+  when: '"rancher_server" in group_names' 
 
+- name: Ensure the .kube directory exists in the user's home
+  ansible.builtin.file:
+    path: "/home/{{ rancher_user }}/.kube"
+    state: directory
+    owner: "{{ rancher_user }}"
+    group: "{{ rancher_user }}"
+  when: '"rancher_server" in group_names' 
+
+- name: Copy rancher settings to user directory
+  ansible.builtin.copy:
+    src:  /etc/rancher/rke2/rke2.yaml
+    dest: "/home/{{ rancher_user }}/.kube/config.yaml" 
+    remote_src: true
+    owner: "{{ rancher_user }}"
+    group: "{{ rancher_user }}"
+  when: '"rancher_server" in group_names' 
+
+- name: Setup cluster access on ansible controller
+  ansible.builtin.import_tasks: setup_access.yml
+  become: true
+  when: '"rancher_server" in group_names' 

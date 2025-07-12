@@ -12,6 +12,7 @@
 
 - name: Execute the flux installation script
   ansible.builtin.command: /tmp/install-flux.sh
+  become: true
   when: not flux_installed.stat.exists
 
 - name: Clean up the installation script
@@ -26,10 +27,6 @@
   environment:
     GITHUB_TOKEN: "{{ flux_github_token }}"
   register: test_output
-
-- name: test output
-  debug:
-    msg: "{{ test_output }}"
 
 - name: Bootstrap flux
   ansible.builtin.command: >
