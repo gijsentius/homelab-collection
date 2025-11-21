@@ -1,5 +1,35 @@
-- name: Install and setup tailscale connection
+- name: Install and setup tailscale
+  become: true
+  when: 
   block:
+    - name: Download Tailscale GPG keyring
+      ansible.builtin.get_url:
+        url: "https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg"
+        dest: "/usr/share/keyrings/tailscale-archive-keyring.gpg"
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Add Tailscale repository source list
+      ansible.builtin.get_url:
+        url: "https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list"
+        dest: "/etc/apt/sources.list.d/tailscale.list"
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Update apt cache and install Tailscale
+      ansible.builtin.apt:
+        name: tailscale
+        state: present
+        update_cache: yes
+
+    - name: Ensure Tailscale service is enabled and running
+      ansible.builtin.service:
+        name: tailscaled
+        state: started
+        enabled: yes
+  rescue:
     - name: Check if tailscale install script is present
       ansible.builtin.stat:
         path: /tmp/install_tailscale.sh  
@@ -12,7 +42,6 @@
         mode: '0444'
       when: not stat_result.stat.exists
 
-
     - name: Check if tailscale is already installed
       ansible.builtin.stat:
         path: /usr/bin/tailscale
@@ -23,7 +52,14 @@
         sh /tmp/install_tailscale.sh
       when: not tailscale_present.stat.exists
 
-    - name: Register machine with tailscale
-      ansible.builtin.command: >
-        tailscale up --auth-key '{{ tailscale_auth_key }}?ephemeral=false&preauthorized=true' --advertise-tags 'tag:server'
+- name: Check if Tailscale is already authenticated
+  ansible.builtin.command: tailscale status
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+
+- name: Register machine with tailscale
   become: true
+  ansible.builtin.command: >
+    tailscale up --auth-key '{{ tailscale_auth_key }}?ephemeral=false&preauthorized=true' --advertise-tags 'tag:server'
+  when: tailscale_status.rc != 0

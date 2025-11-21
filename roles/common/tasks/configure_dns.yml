@@ -19,7 +19,7 @@
   when:
     - '"systemd-resolved.service" in services'
 
-- name: Link resolv.conf to resolved.conf
+- name: Link systemd stub resolv.conf to resolv.conf
   ansible.builtin.file:
     src: /run/systemd/resolve/stub-resolv.conf
     dest: /etc/resolv.conf
@@ -27,8 +27,6 @@
     state: link
   when: 
     - '"systemd-resolved.service" in services'
-    - '"lnk_target" in resolv_conf.stat'
-    - '"stub-resolv.conf" not in resolv_conf.stat.lnk_target'
 
 - name: Restart systemd-resolved service 
   ansible.builtin.systemd_service:
