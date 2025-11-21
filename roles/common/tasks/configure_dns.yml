@@ -1,6 +1,11 @@
 - name: Populate service facts
   service_facts:
 
+- name: Ensure parent directory exists
+  ansible.builtin.file:
+    path: "/etc/systemd/resolved.conf.d"
+    state: directory
+
 - name: Update DNS config for systemd-resolved
   ansible.builtin.template:
     src: resolved.conf.j2
