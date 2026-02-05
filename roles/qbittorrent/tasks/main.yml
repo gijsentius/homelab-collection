@@ -30,9 +30,12 @@
     env:
       TZ: Europe/Amsterdam
       SERVER_COUNTRIES: 'Netherlands'
-      OPENVPN_USER: "{{ openvpn_user }}"
-      OPENVPN_PASSWORD: "{{ openvpn_password }}"
-      VPN_SERVICE_PROVIDER: 'nordvpn'
+      VPN_SERVICE_PROVIDER: "{{ vpn_provider | default(surfshark) }}"
+      VPN_TYPE: "{{ vpn_type | default(wireguard) }}"
+      OPENVPN_USER: "{{ openvpn_user | default(omit) }}"
+      OPENVPN_PASSWORD: "{{ openvpn_password | default(omit) }}"
+      WIREGUARD_PRIVATE_KEY: "{{ vpn_wireguard_private_key | default(omit) }}"
+      WIREGUARD_ADDRESSES: "{{ vpn_wireguard_private_key | default(omit) }}"
     devices:
       - /dev/net/tun:/dev/net/tun
     capabilities:
