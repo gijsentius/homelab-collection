@@ -4,15 +4,15 @@
   become_user: root
 
 - meta: end_play
-  when: pve_token_id not in pve_existing_tokens 
+  when: pve_token_id not in pve_existing_tokens
 
 # Update template removes a template when it has a newer image available
 - ansible.builtin.include_tasks: update_template.yml
   args:
     apply:
       become: true
-      become_user: root  
-  loop: "{{ pvenode_templates }}" 
+      become_user: root
+  loop: "{{ pvenode_templates | default([]) }}"
   loop_control:
     loop_var: template
 
@@ -20,16 +20,16 @@
   args:
     apply:
       become: true
-      become_user: root  
-  loop: "{{ pvenode_templates }}"
+      become_user: root
+  loop: "{{ pvenode_templates | default([]) }}"
   loop_control:
     loop_var: template
 
-- ansible.builtin.include_tasks: download_iso.yml 
+- ansible.builtin.include_tasks: download_iso.yml
   args:
     apply:
       become: true
-      become_user: root  
-  loop: "{{ pvenode_isos }}"
+      become_user: root
+  loop: "{{ pvenode_isos | default([]) }}"
   loop_control:
     loop_var: iso
